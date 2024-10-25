@@ -5,7 +5,7 @@ local success, moduleScript = pcall(function()
 end)
 
 if success then
-    -- Execute your module functions here if loading was successful
+    -- Your logic here
     local tabs = {
         {
             name = "Tab 1",
