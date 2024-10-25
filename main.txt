@@ -1,4 +1,4 @@
-local url = "https://raw.githubusercontent.com/username/repo/main/TabWindowModule.lua"  -- Replace with your GitHub file's URL
+local url = "https://raw.githubusercontent.com/KubaLubiMaslo/boxedhub/refs/heads/main/modules/gui.txt"  -- Replace with your GitHub file's URL
 
 local success, moduleScript = pcall(function()
     return loadstring(game:HttpGet(url))()
