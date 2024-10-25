@@ -1,7 +1,6 @@
 print("Boxed Hub Started")
 
 local player = game.Players.LocalPlayer
-
 local playergui = player:WaitForChild("PlayerGui")
 
 local chr = player.Character or player.CharacterAdded:Wait()
@@ -14,7 +13,6 @@ local success, moduleScript = pcall(function()
 end)
 
 if success then
-    -- Your logic here
     local tabs = {
         {
             name = "Tab 1",
