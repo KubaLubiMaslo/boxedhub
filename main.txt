@@ -1,6 +1,13 @@
-local url = "https://raw.githubusercontent.com/KubaLubiMaslo/boxedhub/refs/heads/main/modules/gui.txt"
-
 print("Boxed Hub Started")
+
+local player = game.Players.LocalPlayer
+
+local playergui = player:WaitForChild("PlayerGui)
+
+local chr = player.Character or player.CharacterAdded:Wait()
+local hum = chr:WaitForChild("Humanoid")
+
+local url = "https://raw.githubusercontent.com/KubaLubiMaslo/boxedhub/refs/heads/main/modules/gui.txt"
 
 local success, moduleScript = pcall(function()
     return loadstring(game:HttpGet(url))()
@@ -25,8 +32,11 @@ if success then
         }
     }
     
-    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    moduleScript:CreateWindow(playerGui, tabs)
+    moduleScript:CreateWindow(playergui, tabs)
 else
     warn("Failed to load the module from GitHub:", moduleScript)
 end
+
+hum.Died:Connect(function()
+    moduleScript:DestroyWindow(playergui)
+end)
