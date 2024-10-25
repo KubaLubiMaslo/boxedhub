@@ -93,4 +93,12 @@ function TabWindowModule:CreateWindow(parent, tabs)
     return window
 end
 
+function TabWindowModule:DestroyWindow(parent)
+    for _, i in pairs(parent:GetChildren()) do
+        if i.Name == "TabWindowGui" then
+            i:Destroy()
+        end
+    end
+end
+
 return TabWindowModule
