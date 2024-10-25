@@ -1,4 +1,4 @@
-# Welcome to BoxedHub
+# Welcome to BoxedHub!
 
 This is a roblox-executor script for The Strongest Battlegrounds.
 
