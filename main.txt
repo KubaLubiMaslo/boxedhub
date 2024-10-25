@@ -1,1 +1,30 @@
-print("Hello")
+local url = "https://raw.githubusercontent.com/username/repo/main/TabWindowModule.lua"  -- Replace with your GitHub file's URL
+
+local success, moduleScript = pcall(function()
+    return loadstring(game:HttpGet(url))()
+end)
+
+if success then
+    -- Execute your module functions here if loading was successful
+    local tabs = {
+        {
+            name = "Tab 1",
+            toggles = {
+                { name = "Option 1", callback = function(state) print("Option 1:", state) end },
+                { name = "Option 2", callback = function(state) print("Option 2:", state) end }
+            }
+        },
+        {
+            name = "Tab 2",
+            toggles = {
+                { name = "Feature 1", callback = function(state) print("Feature 1:", state) end },
+                { name = "Feature 2", callback = function(state) print("Feature 2:", state) end }
+            }
+        }
+    }
+    
+    local playerGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    moduleScript:CreateWindow(playerGui, tabs)
+else
+    warn("Failed to load the module from GitHub:", moduleScript)
+end
