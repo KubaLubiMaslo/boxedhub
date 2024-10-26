@@ -55,10 +55,11 @@ function TabWindowModule:CreateOrUpdateTab(tabName)
         tabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         tabButton.Parent = self.tabContainer
 
-        -- Calculate position for the new tab button
+        -- Calculate position for the new tab button based on the total tabs
         local buttonIndex = #self.tabButtons + 1
         tabButton.Position = UDim2.new(0, 0, 0, (buttonIndex - 1) * 50)
-        self.tabButtons[tabName] = tabButton
+        self.tabButtons[buttonIndex] = tabButton  -- Insert button by index
+        self.tabButtons[tabName] = tabButton      -- Reference button by tab name
 
         -- Create new content frame for the tab
         tabContent = Instance.new("Frame")
@@ -87,6 +88,7 @@ function TabWindowModule:CreateOrUpdateTab(tabName)
 
     return tabContent
 end
+
 
 -- Function to add or update a toggle in a specified tab
 function TabWindowModule:CreateOrUpdateToggle(tabName, toggleName, callback)
