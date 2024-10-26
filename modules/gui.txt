@@ -9,7 +9,7 @@ TabWindowModule.currentContent = nil
 -- Create the main window
 function TabWindowModule:CreateWindow(parent)
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "TabWindowGui"
+    screenGui.Name = "BoxHubGui"
     screenGui.ResetOnSpawn = false
     screenGui.Parent = parent
 
@@ -27,6 +27,7 @@ function TabWindowModule:CreateWindow(parent)
     local tabContainer = Instance.new("ScrollingFrame")
     tabContainer.Size = UDim2.new(1, 0, 1, 0)
     tabContainer.CanvasSize = UDim2.new(0, 0, 1, 0)
+    tabContainer.ScrollBarThickness = 5
     tabContainer.Parent = tabList
 
     local contentFrame = Instance.new("Frame")
@@ -44,7 +45,7 @@ end
 
 -- Function to create or update a tab
 function TabWindowModule:CreateOrUpdateTab(tabName)
-    -- Check if tab already exists, if so, retrieve its content frame
+    -- Check if tab already exists
     local tabContent = self.tabs[tabName]
     if not tabContent then
         -- Create new tab button
@@ -53,6 +54,10 @@ function TabWindowModule:CreateOrUpdateTab(tabName)
         tabButton.Text = tabName
         tabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         tabButton.Parent = self.tabContainer
+
+        -- Calculate position for the new tab button
+        local buttonIndex = #self.tabButtons + 1
+        tabButton.Position = UDim2.new(0, 0, 0, (buttonIndex - 1) * 50)
         self.tabButtons[tabName] = tabButton
 
         -- Create new content frame for the tab
@@ -64,7 +69,7 @@ function TabWindowModule:CreateOrUpdateTab(tabName)
         tabContent.Parent = self.contentFrame
         self.tabs[tabName] = tabContent
 
-        -- Add button functionality to show the tab
+        -- Add button functionality to switch to the selected tab
         tabButton.MouseButton1Click:Connect(function()
             if self.currentContent then
                 self.currentContent.Visible = false
@@ -74,11 +79,12 @@ function TabWindowModule:CreateOrUpdateTab(tabName)
         end)
     end
 
-    -- Automatically show the first tab created
+    -- Show the first tab created by default
     if not self.currentContent then
         tabContent.Visible = true
         self.currentContent = tabContent
     end
+
     return tabContent
 end
 
@@ -115,7 +121,7 @@ end
 -- Function to destroy the window
 function TabWindowModule:DestroyWindow(parent)
     for _, i in pairs(parent:GetChildren()) do
-        if i.Name == "TabWindowGui" then
+        if i.Name == "BoxHubGui" then
             i:Destroy()
         end
     end
