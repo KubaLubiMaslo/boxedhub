@@ -1,85 +1,118 @@
 local TabWindowModule = {}
 
-function TabWindowModule:CreateWindow(parent, tabs)
+-- Initialize variables to store UI elements
+TabWindowModule.tabs = {}
+TabWindowModule.tabButtons = {}
+TabWindowModule.tabContents = {}
+TabWindowModule.currentContent = nil
+
+-- Create the main window
+function TabWindowModule:CreateWindow(parent)
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "TabWindowGui"
-    screenGui.ResetOnSpawn = false  -- Optional: prevents the GUI from disappearing when respawning
-    screenGui.Parent = parent  -- Add the ScreenGui to PlayerGui
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = parent
 
     local window = Instance.new("Frame")
     window.Size = UDim2.new(0, 400, 0, 300)
     window.Position = UDim2.new(0.5, -200, 0.5, -150)
     window.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    window.Parent = screenGui  -- Now parented to the ScreenGui
-    
+    window.Parent = screenGui
+
     local tabList = Instance.new("Frame")
     tabList.Size = UDim2.new(0, 100, 1, 0)
     tabList.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     tabList.Parent = window
-    
+
     local tabContainer = Instance.new("ScrollingFrame")
     tabContainer.Size = UDim2.new(1, 0, 1, 0)
     tabContainer.CanvasSize = UDim2.new(0, 0, 1, 0)
     tabContainer.Parent = tabList
-    
+
     local contentFrame = Instance.new("Frame")
     contentFrame.Size = UDim2.new(1, -100, 1, 0)
     contentFrame.Position = UDim2.new(0, 100, 0, 0)
     contentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     contentFrame.Parent = window
-    
-    local tabButtons = {}
-    local tabContents = {}
 
-    for i, tabData in pairs(tabs) do
-        local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(1, 0, 0, 50)
-        tabButton.Position = UDim2.new(0, 0, 0, (i - 1) * 50)
-        tabButton.Text = tabData.name
-        tabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-        tabButton.Parent = tabContainer
-        table.insert(tabButtons, tabButton)
-        
-        local content = Instance.new("Frame")
-        content.Size = UDim2.new(1, 0, 1, 0)
-        content.Position = UDim2.new(0, 0, 0, 0)
-        content.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-        content.Visible = false
-        content.Parent = contentFrame
-        table.insert(tabContents, content)
+    TabWindowModule.screenGui = screenGui
+    TabWindowModule.tabContainer = tabContainer
+    TabWindowModule.contentFrame = contentFrame
 
-        for j, toggleData in pairs(tabData.toggles) do
-            local toggleButton = Instance.new("TextButton")
-            toggleButton.Size = UDim2.new(0, 200, 0, 50)
-            toggleButton.Position = UDim2.new(0, 10, 0, (j - 1) * 60)
-            toggleButton.Text = toggleData.name .. " (OFF)"
-            toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            toggleButton.Parent = content
-            
-            local isOn = false
-            toggleButton.MouseButton1Click:Connect(function()
-                isOn = not isOn
-                toggleButton.Text = toggleData.name .. (isOn and " (ON)" or " (OFF)")
-                toggleData.callback(isOn)
-            end)
-        end
-        
-        tabButton.MouseButton1Click:Connect(function()
-            -- Hide all other tabs and show the selected one
-            for _, otherContent in pairs(tabContents) do
-                otherContent.Visible = false
-            end
-            content.Visible = true
-        end)
-        
-        if i == 1 then
-            content.Visible = true
-        end
-    end
-    
     return window
 end
 
+-- Function to create or update a tab
+function TabWindowModule:CreateOrUpdateTab(tabName)
+    -- Check if tab already exists, if so, retrieve its content frame
+    local tabContent = self.tabs[tabName]
+    if not tabContent then
+        -- Create new tab button
+        local tabButton = Instance.new("TextButton")
+        tabButton.Size = UDim2.new(1, 0, 0, 50)
+        tabButton.Text = tabName
+        tabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        tabButton.Parent = self.tabContainer
+        self.tabButtons[tabName] = tabButton
+
+        -- Create new content frame for the tab
+        tabContent = Instance.new("Frame")
+        tabContent.Size = UDim2.new(1, 0, 1, 0)
+        tabContent.Position = UDim2.new(0, 0, 0, 0)
+        tabContent.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        tabContent.Visible = false
+        tabContent.Parent = self.contentFrame
+        self.tabs[tabName] = tabContent
+
+        -- Add button functionality to show the tab
+        tabButton.MouseButton1Click:Connect(function()
+            if self.currentContent then
+                self.currentContent.Visible = false
+            end
+            tabContent.Visible = true
+            self.currentContent = tabContent
+        end)
+    end
+
+    -- Automatically show the first tab created
+    if not self.currentContent then
+        tabContent.Visible = true
+        self.currentContent = tabContent
+    end
+    return tabContent
+end
+
+-- Function to add or update a toggle in a specified tab
+function TabWindowModule:CreateOrUpdateToggle(tabName, toggleName, callback)
+    local tabContent = self:CreateOrUpdateTab(tabName)
+
+    -- Check if the toggle already exists
+    local existingToggle = nil
+    for _, child in pairs(tabContent:GetChildren()) do
+        if child:IsA("TextButton") and child.Text:match("^" .. toggleName) then
+            existingToggle = child
+            break
+        end
+    end
+
+    local toggleButton = existingToggle or Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0, 200, 0, 50)
+    toggleButton.Position = UDim2.new(0, 10, 0, #tabContent:GetChildren() * 60)
+    toggleButton.Text = toggleName .. " (OFF)"
+    toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    toggleButton.Parent = tabContent
+
+    local isOn = false
+    toggleButton.MouseButton1Click:Connect(function()
+        isOn = not isOn
+        toggleButton.Text = toggleName .. (isOn and " (ON)" or " (OFF)")
+        callback(isOn)
+    end)
+
+    return toggleButton
+end
+
+-- Function to destroy the window
 function TabWindowModule:DestroyWindow(parent)
     for _, i in pairs(parent:GetChildren()) do
         if i.Name == "TabWindowGui" then
